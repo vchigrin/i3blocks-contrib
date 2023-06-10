@@ -13,6 +13,7 @@
 
 #define RED "#FF7373"
 #define ORANGE "#FFA500"
+#define GREEN "#00FF00"
 
 typedef unsigned long long int ulli;
 
@@ -39,7 +40,7 @@ void display(const char *label, double used,
   } else if (warning != 0 && used > warning) {
     printf("%s<span color='%s'>", label, ORANGE);
   } else {
-    printf("%s<span>", label);
+    printf("%s<span color='%s'>", label, GREEN);
   }
 
   printf("%*.*lf%%</span>\n", decimals + 3 + 1, decimals, used);

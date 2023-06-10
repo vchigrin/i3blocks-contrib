@@ -9,6 +9,7 @@
 
 #define RED "#FF7373"
 #define ORANGE "#FFA500"
+#define GREEN "#00FF00"
 
 
 typedef unsigned long ulong;
@@ -58,12 +59,12 @@ void load_bar_chars(utf8_char* bar_chars, uint count, char* characters) {
     } else if ( (c[0] & BYTE_FIVE) == BYTE_FOUR) {
       size = 4;
     }
-    
+
     for (uint j = 0; j < size; j++)
      b->bytes[j] = c[j];
 
     b->size = size;
-    
+
     c += size;
   }
 }
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
   int critical = 80;
   char* color_warning = ORANGE;
   char* color_critical = RED;
-  
+
   envvar = getenv("bar_chars");
   if (envvar)
     characters = envvar;
@@ -102,20 +103,20 @@ int main(int argc, char *argv[])
   envvar = getenv("color_critical");
   if (envvar)
     color_critical = envvar;
-  
+
   uint count = utf8_char_count(characters);
   utf8_char* bar_chars = (utf8_char*)malloc(count * sizeof(utf8_char));
-  
+
   load_bar_chars(bar_chars, count, characters);
 
   // allocate the maximun size possible
   int buffer_size = (bar_size * 4) + 1;
   char* buffer = (char*)malloc(buffer_size);
-  
-  
+
+
   uint t = 1;
   while (1) {
-    
+
 
     sysinfo_t info;
     sysinfo(&info);
@@ -123,16 +124,16 @@ int main(int argc, char *argv[])
     long total = info.totalram;
     long free  = info.freeram;
     long usage = total - free;
-    
+
     float percent = 100 * ((float)usage / total);
     float bar_percent = percent;
 
     memset(buffer, 0, buffer_size);
-    
+
     //printf("%ld/%ld   %f  ", usage, total, percent);
     char* write_point = buffer;
 
-    float section_size = 100.0 / bar_size; 
+    float section_size = 100.0 / bar_size;
     for (uint i = 0; i < bar_size; i++) {
       int section_val = clamp((int)bar_percent, 0, count-1);
       utf8_char u_char = bar_chars[section_val];
@@ -149,15 +150,15 @@ int main(int argc, char *argv[])
     } else if (warning != 0 && percent > warning) {
       printf("<span color='%s'>", color_warning);
     } else {
-      printf("<span>");
+      printf("<span color='%s'>", GREEN);
     }
 
-    const float byte_to_gb = 1024 * 1024 * 1024;
-    
-    float usage_gb = usage / byte_to_gb;
-    float total_gb = total / byte_to_gb;
-    
-    printf("%s %4.1fG/%4.1fG (%i%%)</span>\n", buffer, usage_gb, total_gb, (int)percent);
+    const long byte_to_mb = 1024 * 1024;
+
+    long usage_mb = usage / byte_to_mb;
+    long total_mb = total / byte_to_mb;
+
+    printf("%sused: %ldM/%ldM (%i%%)</span>\n", buffer, usage_mb, total_mb, (int)percent);
     fflush(stdout);
 
     sleep(t);
